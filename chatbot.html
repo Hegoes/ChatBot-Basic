@@ -11,16 +11,54 @@
     <script src="https://unpkg.com/supersimpledev/react.js"></script>
     <script src="https://unpkg.com/supersimpledev/react-dom.js"></script>
 
+    <script src="https://unpkg.com/supersimpledev/chatbot.js"></script>
+
     <script src="https://unpkg.com/supersimpledev/babel.js"></script> <!-- uses an external library for JSX transpilation -->
     <script type="text/babel">
-        function ChatInput(){
+        function ChatInput({ chatMessageList, setChatMessageList}){
+            const [inputText, setInputText] = React.useState('');
+
+            function saveInputText(event){
+                setInputText(event.target.value);
+            }
+
+            function sendMessage(){
+
+                const newChatMessages = [
+              ...chatMessageList,
+              {
+                message: inputText,
+                sender:'user',
+                id: crypto.randomUUID()
+              }
+              ]
+
+            setChatMessageList(newChatMessages);
+
+              const response = Chatbot.getResponse(inputText);
+               setChatMessageList([
+              ...newChatMessages,
+              {
+                message: response,
+                sender:'robot',
+                id: crypto.randomUUID()
+              }
+              ]);
+
+                setInputText('');
+            }
+
+          
+
             return (
                 <> 
                  <input 
                     placeholder="Send a message to ChatBot" 
                     size="30"
+                    onChange={saveInputText}
+                    value={inputText}
                  />
-                 <button>Send</button>
+                 <button onClick={sendMessage}>Send</button>
                 </>
             );
         }
@@ -30,19 +68,8 @@
            // const sender = props.sender;
            // const {message, sender} = props; // destructuring assignment to extract message and sender from props
            
-           /*
-            if (sender === 'robot'){
-                return (
-                    <div>
-                        <img src="robot.png" width="40" />
-                        {message}
-                    </div>
-                );
-            }
-                    */
-
             return (
-                <div>
+                <div> 
                     { sender === 'robot' && (
                         <img src="robot.png" width="40" /> 
                     )}
@@ -50,33 +77,71 @@
                     { sender === 'user' && (
                         <img src="user.png" width="40" /> 
                     )}      
-                </div>
+                </div>      
             );
         }
 
-        function App(){ // this is used instead of a variable like const app = () cause it allows us to use JSX syntax and return a React element that represents the UI of our application. So using component is more appropriate here than using a variable because 
+        function ChatMessageList({chatMessageList}){ 
             return (
                 <>
-                    <ChatInput />
-                    <ChatMessage 
-                        message="hello chatbot" 
-                        sender="user" 
-                    />
-                    <ChatMessage 
-                        message="Hello human, how can I help you?" 
-                        sender="robot" 
-                    />
-                    <ChatMessage 
-                        message="Can you get me todays date?" 
-                        sender="user"
-                    />
-                    <ChatMessage 
-                        message="Sure, today's date is April 29, 2026." 
-                        sender="robot" 
-                    />
+                    
+
+                    {chatMessageList.map((chatMessage)=>{ // we have an array of components called chatMessageComponents that is created by mapping over the chatMessages array and for each chatMessage object in the array, we return a ChatMessage component with the message and sender props set to the corresponding values from the chatMessage object.  
+                        return(
+                            <ChatMessage
+                                message={chatMessage.message} // this gets the message out of the chatMessage object and passes it as a prop to the ChatMessage component
+                                sender={chatMessage.sender}
+                                key={chatMessage.id}
+                            />
+                        );
+                    })}
                 </>
             );
         }
+        
+
+        function App(){ // this is used instead of a variable like const app = () cause it allows us to use JSX syntax and return a React element that represents the UI of our application. So using component is more appropriate here than using a variable because 
+              
+            const [ chatMessageList, setChatMessageList] = React.useState(
+            [{
+                message: "hello chatbot",
+                sender: "user",
+                id: "id1"
+            },
+            {
+                message: "Hello human, how can I help you?",
+                sender: "robot",
+                id: "id2"
+            },
+            {
+                message: "Can you get me todays date?",
+                sender: "user",
+                id: "id3"
+            },
+            {
+                message: "Sure, today's date is April 29, 2026.",
+                sender: "robot",
+                id: "id4"
+
+            }]);  
+            
+            //const [ chatMessageList, setChatMessageList]=array; thus it has been destructured at the beginning
+            // const chatMessageList = array[0];
+            // const setChatMessageList = array[1];
+            
+            
+            return (
+                <>
+                    <ChatInput 
+                    chatMessageList={chatMessageList}
+                    setChatMessageList={setChatMessageList}
+                    />
+                    <ChatMessageList 
+                        chatMessageList={chatMessageList}
+                    />
+                </>
+            );
+        } 
 
      
 
