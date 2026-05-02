@@ -175,8 +175,19 @@
         }
 
         function ChatMessageList({chatMessageList}){ 
+            
+            const chatMessagesRef=React.useRef(null);  
+              
+            React.useEffect(() => {
+                        const containerElem = chatMessagesRef.current;
+                        if (containerElem){
+                            containerElem.scrollTop = containerElem.scrollHeight;     
+                        }
+            },
+            [chatMessageList]);
             return (
-                <div className="chat-messages-container">
+                <div className="chat-messages-container" 
+                ref={chatMessagesRef}>
                     
 
                     {chatMessageList.map((chatMessage)=>{ // we have an array of components called chatMessageComponents that is created by mapping over the chatMessages array and for each chatMessage object in the array, we return a ChatMessage component with the message and sender props set to the corresponding values from the chatMessage object.  
